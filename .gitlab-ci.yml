@@ -4,12 +4,11 @@ build_tree_sitter:
         - pacman -Syu --noconfirm
         - pacman -S --noconfirm tree-sitter-cli nodejs emscripten
         - source /etc/profile.d/emscripten.sh
-        - cd tools/tree-sitter-charon
         - tree-sitter generate
         - tree-sitter build --wasm
     artifacts:
         paths:
-            - tools/tree-sitter-charon/tree-sitter-charon.wasm
+            - tree-sitter-charon.wasm
 
 build_tree_sitter_abi_14:
     image: archlinux:latest
@@ -17,9 +16,8 @@ build_tree_sitter_abi_14:
         - pacman -Syu --noconfirm
         - pacman -S --noconfirm tree-sitter-cli nodejs emscripten
         - source /etc/profile.d/emscripten.sh
-        - cd tools/tree-sitter-charon
         - tree-sitter generate --abi 14
         - tree-sitter build --wasm
     artifacts:
         paths:
-            - tools/tree-sitter-charon/tree-sitter-charon.wasm
+            - tree-sitter-charon.wasm
