@@ -4,9 +4,7 @@
       "name": "charon",
       "camelcase": "Charon",
       "scope": "source.charon",
-      "file-types": [
-        ".charon"
-      ],
+      "file-types": [".charon"],
       "injection-regex": "^charon$"
     }
   ],
@@ -18,11 +16,11 @@
       {
         "name": "WuX",
         "email": "wux@thenest.dev",
-        "url": "https://thenest.dev/"
+        "url": "https://git.thenest.dev/wux"
       }
     ],
     "links": {
-      "repository": "https://git.thenest.dev/wux/charon"
+      "repository": "https://git.thenest.dev/charon/charon-tree-sitter"
     }
   },
   "bindings": {
