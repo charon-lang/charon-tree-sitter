@@ -29,6 +29,9 @@ build_tree_sitter_abi_14:
       - tree-sitter-charon.wasm
 
 trigger_vscode_extension:
+  image: bash:latest
   stage: deploy
   script:
-    - 'curl --fail --request POST --form token=${VSCODE_EXTENSION_PIPELINE_TOKEN} --form ref=main "${CI_API_V4_URL}/projects/20/trigger/pipeline"'
+    - apk add curl
+    - |
+      curl --fail --request POST --form token=${VSCODE_EXTENSION_PIPELINE_TOKEN} --form ref=main "${CI_API_V4_URL}/projects/20/trigger/pipeline"
