@@ -15,16 +15,17 @@ module.exports = grammar({
 
         comment: ($) => choice(seq("//", /(\\+(.|\r?\n)|[^\\\n])*/), $.multiline_comment),
 
-        type_generic: ($) => seq("<", field("name", $.identifier), repeat(seq(",", field("name", $.identifier))), ">"),
+        type_generic_def: ($) => seq("<", field("name", $.identifier), repeat(seq(",", field("name", $.identifier))), ">"),
+        type_generic: ($) => seq("<", field("type", $.type), repeat(seq(",", field("type", $.type))), ">"),
 
         // stmt
         _tlc: ($) => seq(repeat($.attribute), choice($.tlc_module, $.tlc_function, $.tlc_extern, $.tlc_declaration, $.tlc_type, $.tlc_enum)),
 
         tlc_module: ($) => seq("module", field("name", $.identifier), "{", field("body", repeat($._tlc)), "}"),
-        tlc_function: ($) => seq("fn", field("name", $.identifier), optional($.type_generic), field("type", $.function_type), field("body", $._stmt)),
-        tlc_extern: ($) => seq("extern", "fn", field("name", $.identifier), optional($.type_generic), field("type", $.function_type), ";"),
+        tlc_function: ($) => seq("fn", field("name", $.identifier), optional($.type_generic_def), field("type", $.function_type), field("body", $._stmt)),
+        tlc_extern: ($) => seq("extern", "fn", field("name", $.identifier), optional($.type_generic_def), field("type", $.function_type), ";"),
         tlc_declaration: ($) => seq("let", field("name", $.identifier), ":", field("type", $.type), field("value", optional(seq("=", $._expr))), ";"),
-        tlc_type: ($) => seq("type", field("name", $.identifier), optional($.type_generic), field("type", $.type)),
+        tlc_type: ($) => seq("type", field("name", $.identifier), optional($.type_generic_def), field("type", $.type)),
         tlc_enum: ($) => seq("enum", field("name", $.identifier), "{", optional(seq(field("member", $.identifier), repeat(seq(",", field("member", $.identifier))))), "}"),
 
         // stmt
@@ -64,7 +65,7 @@ module.exports = grammar({
                 seq(field("value", $._expr), field("operation", choice(seq("as", $.type), seq("[", $._expr, "]"), $.expr_unary_call, $.expr_unary_subscript_const, $.expr_unary_subscript_arrow)))
             ),
 
-        expr_unary_call: ($) => seq("(", optional(seq($._expr, repeat(seq(",", $._expr)))), ")"),
+        expr_unary_call: ($) => seq(optional(seq(":", $.type_generic)), "(", optional(seq($._expr, repeat(seq(",", $._expr)))), ")"),
         expr_unary_subscript_const: ($) => seq(".", choice($.number_dec, $.identifier)),
         expr_unary_subscript_arrow: ($) => seq("->", $.identifier),
 
@@ -79,10 +80,10 @@ module.exports = grammar({
         type_struct: ($) => seq("struct", "{", repeat(seq(field("member_name", $.identifier), ":", field("member_type", $.type), ";")), "}"),
         type_tuple: ($) => seq("(", $.type, repeat(seq(",", $.type)), ")"),
         type_array: ($) => seq("[", field("size", $.number), "]", field("type", $.type)),
-        type_primary: ($) => seq(repeat(seq(field("selector", $.identifier), "::")), field("name", $.identifier)),
+        type_primary: ($) => prec.right(seq(repeat(seq(field("selector", $.identifier), "::")), field("name", $.identifier), optional($.type_generic))),
 
         function_argument: ($) => choice(seq(field("name", $.identifier), ":", field("type", $.type)), "..."),
-        function_type: ($) => seq("(", field("arguments", optional(seq($.function_argument, repeat(seq(",", $.function_argument))))), ")", field("return_type", optional(seq(":", $.type)))),
+        function_type: ($) => prec.left(seq("(", field("arguments", optional(seq($.function_argument, repeat(seq(",", $.function_argument))))), ")", field("return_type", optional(seq(":", $.type))))),
         attribute: ($) => prec.left(seq("@", field("name", $.identifier), optional(seq("(", optional(seq($.literal, repeat(seq(",", $.literal)))), ")")))),
 
         // lexer
