@@ -24,7 +24,7 @@ module.exports = grammar({
         tlc_module: ($) => seq("module", field("name", $.identifier), "{", field("body", repeat($._tlc)), "}"),
         tlc_function: ($) => seq("fn", field("name", $.identifier), optional($.type_generic_def), field("type", $.function_type), field("body", $._stmt)),
         tlc_extern: ($) => seq("extern", "fn", field("name", $.identifier), optional($.type_generic_def), field("type", $.function_type), ";"),
-        tlc_declaration: ($) => seq("let", field("name", $.identifier), ":", field("type", $.type), field("value", optional(seq("=", $._expr))), ";"),
+        tlc_declaration: ($) => seq("let", field("name", $.identifier), ":", field("type", $.type), field("value", optional(seq("=", $._expr)))),
         tlc_type: ($) => seq("type", field("name", $.identifier), optional($.type_generic_def), field("type", $.type)),
         tlc_enum: ($) => seq("enum", field("name", $.identifier), "{", optional(seq(field("member", $.identifier), repeat(seq(",", field("member", $.identifier))))), "}"),
 
@@ -77,7 +77,8 @@ module.exports = grammar({
 
         // util
         type: ($) => seq(repeat($.attribute), choice($.type_struct, $.type_tuple, $.type_array, seq("*", $.type), seq("fn", $.function_type), $.type_primary)),
-        type_struct: ($) => seq("struct", "{", repeat(seq(field("member_name", $.identifier), ":", field("member_type", $.type), ";")), "}"),
+        _type_struct_member: ($) => seq(field("member_name", $.identifier), ":", field("member_type", $.type)),
+        type_struct: ($) => seq("struct", "{", optional(seq($._type_struct_member, repeat(seq(",", $._type_struct_member)))), "}"),
         type_tuple: ($) => seq("(", $.type, repeat(seq(",", $.type)), ")"),
         type_array: ($) => seq("[", field("size", $.number), "]", field("type", $.type)),
         type_primary: ($) => prec.right(seq(repeat(seq(field("selector", $.identifier), "::")), field("name", $.identifier), optional($.type_generic))),
